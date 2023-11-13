@@ -33,8 +33,8 @@ struct ScrumsView: View {
             NewScrumSheet(scrums: $scrums, isPresentingNewScrumView: $isPresentingNewScrumView)
         }
         // how can i change the this code? let's think about it 
-        .onChange(of: scenePhase) { phase in
-            if phase == .inactive { saveAction() }
+        .onChange(of: scenePhase) {
+            if scenePhase == .inactive { saveAction() }
         }
     }
 }

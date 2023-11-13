@@ -5,14 +5,18 @@
 //  Created by 이소현 on 2023/10/02.
 //
 
-import Foundation
+import SwiftUI
 
 @MainActor
 class ScrumStore: ObservableObject {
     @Published var scrums: [DailyScrum] = []
     
     private static func fileURL() throws -> URL {
-        try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        try FileManager.default.url(for: .documentDirectory, 
+                                    in: .userDomainMask,
+                                    appropriateFor: nil,
+                                    
+                                    create: false)
             .appendingPathExtension("scrums.data")
     }
     

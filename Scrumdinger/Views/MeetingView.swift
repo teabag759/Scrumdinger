@@ -5,6 +5,8 @@ import AVFoundation
 struct MeetingView: View {
     @Binding var scrum: DailyScrum
     @StateObject var scrumTimer = ScrumTimer()
+    @StateObject var speechRecognizer = SpeechRecognizer()
+    @State private var isRecording = false
     
     private var player: AVPlayer { AVPlayer.sharedDingPlayer }
     
@@ -13,13 +15,10 @@ struct MeetingView: View {
             RoundedRectangle(cornerRadius: 16.0)
                 .fill(scrum.theme.mainColor)
             VStack {
-                MeetingHeaderView(secondsElapsed: scrumTimer.secondsElapsed,
-                                  secondsRemaining: scrumTimer.secondsRemaining,
-                                  theme: scrum.theme)
-                Circle()
-                    .strokeBorder(lineWidth: 24)
-                MeetingFooterView(speakers: scrumTimer.speakers, skipAction: scrumTimer.skipSpeaker)
-            }
+                MeetingHeaderView(secondsElapsed: scrumTimer.secondsElapsed, secondsRemaining: scrumTimer.secondsRemaining, theme: scrum.theme)
+                MeetingTimerView(speakers: scrumTimer.speakers, isRecording: isRecording, theme: scrum.theme)
+                MeetingFooterView(speakers: scrumTimer.speakers, skipAction: scrumTimer.skipSpeaker)       }
+            
         }
         .padding()
         .foregroundColor(scrum.theme.accentColor)
@@ -32,19 +31,24 @@ struct MeetingView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
     }
-
+    
     private func startScrum() {
         scrumTimer.reset(lengthInMinutes: scrum.lengthInMinutes, attendees: scrum.attendees)
         scrumTimer.speakerChangedAction = {
             player.seek(to: .zero)
             player.play()
         }
+        speechRecognizer.resetTranscript()
+        speechRecognizer.startTranscribing()
+        isRecording = true
         scrumTimer.startScrum()
     }
     
     private func endScrum() {
         scrumTimer.stopScrum()
-        let newHistroy = History(attendees: scrum.attendees)
+        speechRecognizer.stopTranscribing()
+        isRecording = false
+        let newHistroy = History(attendees: scrum.attendees, transcript: speechRecognizer.transcript)
         scrum.histroy.insert(newHistroy, at: 0)
     }
 }
